@@ -1,37 +1,22 @@
-Клонировать репозиторий и перейти в него в командной строке:
+# "Укоротитель ссылок YaCut"
+## Автор
+[Злобин Иван](https://github.com/gavingreenhorn)
+## Стек
+- Python 3.9
+- [Scrapy](https://docs.scrapy.org/)
+## Развертывание
+>`git clone git@github.com:gavingreenhorn/yacut`
 
-```
-git clone 
-```
+>`cd yacut`
 
-```
-cd yacut
-```
+>`python -m venv venv`
 
-Cоздать и активировать виртуальное окружение:
+>`. venv/bin/activate`
 
-```
-python3 -m venv venv
-```
-
-* Если у вас Linux/macOS
-
-    ```
-    source venv/bin/activate
-    ```
-
-* Если у вас windows
-
-    ```
-    source venv/scripts/activate
-    ```
-
-Установить зависимости из файла requirements.txt:
-
-```
-python3 -m pip install --upgrade pip
-```
-
-```
-pip install -r requirements.txt
-```
+>`python -m pip install -r requirements.txt`
+## Запуск
+>`flask run`
+## Возможности
+- создание коротких ссылок по адресу http://localhost:5000
+- переадресация к полной ссылке при переходе по короткой
+- взаимодействие с api по адресу http://localhost:5000/api/id/
