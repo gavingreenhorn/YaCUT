@@ -3,7 +3,8 @@
 [Злобин Иван](https://github.com/gavingreenhorn)
 ## Стек
 - Python 3.9
-- [Scrapy](https://docs.scrapy.org/)
+- [Flask](https://flask.palletsprojects.com/)
+- [SQLAlchemy](https://docs.sqlalchemy.org/)
 ## Развертывание
 >`git clone git@github.com:gavingreenhorn/yacut`
 
