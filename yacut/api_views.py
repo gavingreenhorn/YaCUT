@@ -1,22 +1,22 @@
 import re
 from http import HTTPStatus
+from urllib.parse import urlparse
 
 from flask import request, jsonify
 
-from . import app, db
+from . import app
 from .error_handlers import InvalidAPIUsage
 from .constants import (
-    DOESNT_EXIST_MSG, EMPTY_REQUEST_MSG, FIELDS_MISSING_MSG,
-    INVALID_URL_FORMAT_MSG, INVALID_SHORT_LINK_MSG, DUPLICATE_SHORT_LINK_MSG)
+    DOESNT_EXIST, EMPTY_REQUEST, FIELDS_MISSING, VALID_CHARACTERS_PATTERN,
+    INVALID_URL_FORMAT, INVALID_SHORT_LINK, DUPLICATE_SHORT_LINK)
 from .models import URLMap
-from .views import get_unique_short_id
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
 def get_full_link(short_id):
-    link = URLMap.query.filter_by(short=short_id).first()
+    link = URLMap.get('short', short_id)
     if not link:
-        raise InvalidAPIUsage(DOESNT_EXIST_MSG, 404)
+        raise InvalidAPIUsage(DOESNT_EXIST, 404)
     return jsonify({'url': link.original})
 
 
@@ -24,21 +24,20 @@ def get_full_link(short_id):
 def create_shortcut():
     data = request.get_json()
     if not data:
-        raise InvalidAPIUsage(EMPTY_REQUEST_MSG)
+        raise InvalidAPIUsage(EMPTY_REQUEST)
     if 'url' not in data:
-        raise InvalidAPIUsage(FIELDS_MISSING_MSG.format(field='url'))
-    if not re.match(r'^https?://.*$', data['url']):
-        raise InvalidAPIUsage(INVALID_URL_FORMAT_MSG.format(url=data['url']))
+        raise InvalidAPIUsage(FIELDS_MISSING.format(field='url'))
+    url_parts = urlparse(data['url'])
+    if not (url_parts.netloc and url_parts.scheme in ('http', 'https')):
+        raise InvalidAPIUsage(INVALID_URL_FORMAT.format(url=data['url']))
     custom_id = data.get('custom_id')
     if custom_id:
-        if not re.match(r'^[a-zA-Z\d]{1,16}$', custom_id):
-            raise InvalidAPIUsage(INVALID_SHORT_LINK_MSG)
-        if URLMap.query.filter_by(short=custom_id).first() is not None:
-            raise InvalidAPIUsage(DUPLICATE_SHORT_LINK_MSG.format(
+        if not (re.match(VALID_CHARACTERS_PATTERN, custom_id) and
+                len(custom_id) < 16):
+            raise InvalidAPIUsage(INVALID_SHORT_LINK)
+        if URLMap.get('short', custom_id):
+            raise InvalidAPIUsage(DUPLICATE_SHORT_LINK.format(
                 short_link=f'"{custom_id}"', end='.'))
     url_map = URLMap()
-    url_map.original = data['url']
-    url_map.short = custom_id or get_unique_short_id()
-    db.session.add(url_map)
-    db.session.commit()
+    url_map.create(data['url'], custom_id)
     return jsonify(url_map.to_dict()), HTTPStatus.CREATED

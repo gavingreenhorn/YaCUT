@@ -16,6 +16,8 @@
 
 >`python -m pip install -r requirements.txt`
 ## Запуск
+>`flask create-all`
+
 >`flask run`
 ## Возможности
 - создание коротких ссылок по адресу http://localhost:5000
