@@ -3,8 +3,8 @@ from http import HTTPStatus
 from flask import request, jsonify
 
 from . import app
-from .error_handlers import InvalidAPIUsage
-from .constants import DOESNT_EXIST, EMPTY_REQUEST
+from .error_handlers import ModelValidationError, InvalidAPIUsage
+from .constants import DOESNT_EXIST, EMPTY_REQUEST, FIELDS_MISSING
 from .models import URLMap
 
 
@@ -21,8 +21,12 @@ def create_shortcut():
     data = request.get_json()
     if not data:
         raise InvalidAPIUsage(EMPTY_REQUEST)
+    if 'url' not in data:
+        raise InvalidAPIUsage(FIELDS_MISSING.format(field='url'))
     try:
-        return jsonify(
-            URLMap.create_on_validation(data).to_dict()), HTTPStatus.CREATED
-    except InvalidAPIUsage as exception:
-        raise exception
+        return (
+            jsonify(URLMap.create_on_validation(
+                data['url'], data.get('custom_id')).to_dict()),
+            HTTPStatus.CREATED)
+    except ModelValidationError as error:
+        raise InvalidAPIUsage(message=error.message)

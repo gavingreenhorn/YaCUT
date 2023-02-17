@@ -1,19 +1,18 @@
 import re
-
 from datetime import datetime
 from random import sample
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 
 from flask import url_for
 
 from . import db
 from .constants import (
     VALID_CHARACTER_SEQUENCE, RANDOM_ID_ITERATIONS,
-    OUT_OF_LUCK, RANDOM_LINK_LENGTH, FIELDS_MISSING,
+    OUT_OF_LUCK, RANDOM_LINK_LENGTH,
     SHORT_LINK_CHAR_LIMIT, LONG_LINK_CHAR_LIMIT,
     VALID_CHARACTERS_PATTERN, INVALID_URL_FORMAT,
     INVALID_SHORT_LINK, DUPLICATE_SHORT_LINK)
-from .error_handlers import InvalidAPIUsage
+from .error_handlers import ModelValidationError
 
 
 class URLMap(db.Model):
@@ -34,7 +33,7 @@ class URLMap(db.Model):
                 sample(VALID_CHARACTER_SEQUENCE, RANDOM_LINK_LENGTH))
             if not cls.get('short', random_link):
                 return random_link
-        raise Exception(OUT_OF_LUCK)
+        raise RecursionError(OUT_OF_LUCK)
 
     @classmethod
     def create(cls, original, short=None):
@@ -46,27 +45,25 @@ class URLMap(db.Model):
         return url_map
 
     @classmethod
-    def create_on_validation(cls, data):
-        if 'url' not in data:
-            raise InvalidAPIUsage(FIELDS_MISSING.format(field='url'))
-        url = data['url']
+    def create_on_validation(cls, url, custom_id=None):
         url_parts = urlparse(url)
-        if not (url_parts.netloc and url_parts.scheme in ('http', 'https') and
-                len(url) <= LONG_LINK_CHAR_LIMIT):
-            raise InvalidAPIUsage(INVALID_URL_FORMAT.format(url=url))
-        custom_id = data.get('custom_id')
+        if not (len(url) <= LONG_LINK_CHAR_LIMIT and
+                url_parts.netloc and url_parts.scheme in ('http', 'https')):
+            raise ModelValidationError(INVALID_URL_FORMAT.format(url=url))
         if custom_id:
-            if not (re.match(VALID_CHARACTERS_PATTERN, custom_id) and
-                    len(custom_id) < SHORT_LINK_CHAR_LIMIT):
-                raise InvalidAPIUsage(INVALID_SHORT_LINK)
+            if not (len(custom_id) < SHORT_LINK_CHAR_LIMIT and
+                    re.match(VALID_CHARACTERS_PATTERN, custom_id)):
+                raise ModelValidationError(INVALID_SHORT_LINK)
             if URLMap.get('short', custom_id):
-                raise InvalidAPIUsage(DUPLICATE_SHORT_LINK.format(
+                raise ModelValidationError(DUPLICATE_SHORT_LINK.format(
                     short_link=f'"{custom_id}"', end='.'))
         return cls.create(url, custom_id)
 
     @property
     def fully_qualified_short_link(self):
-        return urljoin(url_for('index_view', _external=True), self.short)
+        return url_for(
+            'redirect_to_full_link',
+            shortcut=self.short, _external=True)
 
     def to_dict(self):
         return dict(

@@ -3,7 +3,8 @@ from http import HTTPStatus
 from flask import abort, flash, redirect, render_template
 
 from . import app
-from .constants import DUPLICATE_SHORT_LINK, DEFAULT_OK
+from .constants import DUPLICATE_SHORT_LINK
+from .error_handlers import ModelValidationError
 from .forms import URLMapForm
 from .models import URLMap
 
@@ -18,14 +19,17 @@ def index_view():
         flash(DUPLICATE_SHORT_LINK.format(
             short_link=input_short, end='!'))
         return render_template('index.html', form=form)
-    url_map = URLMap.create(input_long, input_short)
-    return (
-        render_template(
-            'index.html',
-            form=form,
-            link_message=DEFAULT_OK,
-            shortcut=url_map.fully_qualified_short_link),
-        HTTPStatus.OK)
+    try:
+        url_map = URLMap.create(input_long, input_short)
+        return (
+            render_template(
+                'index.html',
+                form=form,
+                shortcut=url_map.fully_qualified_short_link),
+            HTTPStatus.OK)
+    except ModelValidationError as error:
+        flash(error.message)
+        return render_template('index.html', form=form)
 
 
 @app.route('/<string:shortcut>')
