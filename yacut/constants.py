@@ -1,11 +1,12 @@
+from string import ascii_lowercase, ascii_uppercase, digits
+
 LONG_LINK_CHAR_LIMIT = 256
 RANDOM_ID_ITERATIONS = 10
 SHORT_LINK_CHAR_LIMIT = 16
+RANDOM_LINK_LENGTH = 6
 
-BASE_HTTP_ADDRESS = 'http://localhost/'
-VALID_CHARACTER_SEQUENCE = (
-    '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
-VALID_CHARACTERS_PATTERN = f'^[{VALID_CHARACTER_SEQUENCE}]*$'
+VALID_CHARACTER_SEQUENCE = ascii_lowercase + ascii_uppercase + digits
+VALID_CHARACTERS_PATTERN = fr'^[{VALID_CHARACTER_SEQUENCE}]*$'
 
 OUT_OF_LUCK = (
     'Все возможные комбинации исчерпаны, '
@@ -21,6 +22,7 @@ INCORRECT_STRING_LENGTH = ('Принимается строка длиной д�
 INVALID_CHARACTERS = ('Использованы недопустимые символы. '
                       'Допустимые символы: латинские буквы и цифры')
 
+BASE_API_ERROR = 'Ошибка валидации: {error_message}'
 DOESNT_EXIST = 'Указанный id не найден'
 EMPTY_REQUEST = 'Отсутствует тело запроса'
 FIELDS_MISSING = '"{field}" является обязательным полем!'

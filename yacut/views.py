@@ -18,13 +18,12 @@ def index_view():
         flash(DUPLICATE_SHORT_LINK.format(
             short_link=input_short, end='!'))
         return render_template('index.html', form=form)
-    url_map = URLMap()
-    url_map.create(input_long, input_short)
-    flash(DEFAULT_OK)
+    url_map = URLMap.create(input_long, input_short)
     return (
         render_template(
             'index.html',
             form=form,
+            link_message=DEFAULT_OK,
             shortcut=url_map.fully_qualified_short_link),
         HTTPStatus.OK)
 

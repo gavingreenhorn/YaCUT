@@ -16,7 +16,11 @@
 
 >`python -m pip install -r requirements.txt`
 ## Запуск
->`flask create-all`
+>`flask db init`
+
+>`flask db migrate`
+
+>`flask db upgrade`
 
 >`flask run`
 ## Возможности

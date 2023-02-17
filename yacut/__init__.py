@@ -6,7 +6,6 @@ from settings import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
-db.create_all()
 migrate = Migrate(app, db)
 
-from . import api_views, views, error_handlers, commands
+from . import views, error_handlers, api_views
