@@ -10,7 +10,7 @@ VALID_CHARACTERS_PATTERN = fr'^[{VALID_CHARACTER_SEQUENCE}]*$'
 
 OUT_OF_LUCK = (
     'Все возможные комбинации исчерпаны, '
-    'или заданное количество попыток слишком мало, обратитесь к авторам курса')
+    'или заданное количество попыток слишком мало')
 
 SUBMIT_BUTTON_LABEL = 'Создать'
 ORIGINAL_LINK_LABEL = 'Длинная ссылка'

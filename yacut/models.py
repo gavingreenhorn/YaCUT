@@ -73,8 +73,3 @@ class URLMap(db.Model):
             url=self.original,
             short_link=self.fully_qualified_short_link
         )
-
-    def from_dict(self, data):
-        for field in ['url', 'custom_id']:
-            if field in data:
-                setattr(self, field, data[field])
