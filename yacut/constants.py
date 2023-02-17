@@ -1,7 +1,7 @@
 from re import escape
 from string import ascii_lowercase, ascii_uppercase, digits
 
-LONG_LINK_CHAR_LIMIT = 512
+LONG_LINK_CHAR_LIMIT = 10190
 RANDOM_ID_ITERATIONS = 10
 RANDOM_LINK_LENGTH = 6
 SHORT_LINK_CHAR_LIMIT = 16

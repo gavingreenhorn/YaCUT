@@ -33,7 +33,7 @@ class URLMap(db.Model):
                 sample(VALID_CHARACTER_SEQUENCE, RANDOM_LINK_LENGTH))
             if not cls.get('short', random_link):
                 return random_link
-        raise RecursionError(OUT_OF_LUCK)
+        raise StopIteration(OUT_OF_LUCK)
 
     @classmethod
     def create(cls, original, short=None):
@@ -46,9 +46,10 @@ class URLMap(db.Model):
 
     @classmethod
     def create_on_validation(cls, url, custom_id=None):
+        if not len(url) <= LONG_LINK_CHAR_LIMIT:
+            raise ModelValidationError(INVALID_URL_FORMAT.format(url=url))
         url_parts = urlparse(url)
-        if not (len(url) <= LONG_LINK_CHAR_LIMIT and
-                url_parts.netloc and url_parts.scheme in ('http', 'https')):
+        if not (url_parts.netloc and url_parts.scheme in ('http', 'https')):
             raise ModelValidationError(INVALID_URL_FORMAT.format(url=url))
         if custom_id:
             if not (len(custom_id) < SHORT_LINK_CHAR_LIMIT and
